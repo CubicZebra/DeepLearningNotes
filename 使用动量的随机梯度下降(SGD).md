@@ -10,7 +10,7 @@ $$\boldsymbol{v_{k+1}} = \alpha \boldsymbol{v_k} - \epsilon \boldsymbol{g_k} = \
 
 $$\boldsymbol{v_{k+1}} = \alpha^{k} \boldsymbol{v_1} - \epsilon\sum_{i=0}^{k-1} \alpha^i \boldsymbol{m_{k-i}} - \epsilon\sum_{i=0}^{k-1} \alpha^i \boldsymbol{n_{k-i}}$$
 
-对于前项，在病态条件下总有$sign(\boldsymbol{m_i}) = -sign(\boldsymbol{m_{i-1}})$，因而在k足够大时，梯度在重直优化方向上的震荡会趋向于0，而后一项的分量基本同向，把$\boldsymbol{n_i}$视为随机变量：在k足够大时直观上看就是平行于优化目标的平均梯度分量$\overline{\boldsymbol{n}}_i$以$\alpha$的幂级数和的情形得以保留，即
+对于前项，在病态条件下总有$sign(\boldsymbol{m_i}) = -sign(\boldsymbol{m_{i-1}})$，因而在k足够大时，梯度在重直优化方向上的震荡会趋向于0，而后一项的分量基本同向，把$\boldsymbol{n_i}$视为随机变量：在k足够大时直观上看就是平行于优化目标的平均梯度分量$\overline{\boldsymbol{n}}_i$以$\alpha$的幂的级数情形得以保留，即
 
 $$- \epsilon\sum_{i=0}^{k-1} \alpha^i \boldsymbol{n_{k-i}} \approx - \epsilon \overline{\boldsymbol{n}}_i \sum_{i=0}^{k-1} \alpha^i$$
 
