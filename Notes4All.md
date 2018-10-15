@@ -27,7 +27,7 @@ $\therefore \nabla_{\boldsymbol{b}^{(k)}}J = \nabla_{\boldsymbol{a}^{(k)}} L(\wi
 $$
 \begin{align}
 dz &= tr[(\frac{\partial z}{\partial \boldsymbol{C}})^\intercal d\boldsymbol{C}] = tr[(\frac{\partial z}{\partial \boldsymbol{C}})^\intercal d\boldsymbol{AB}] \\
-   &= tr[\boldsymbol{G}^\intercal (d\boldsymbol{A}\cdot \boldsymbol{B}+\boldsymbol{A}d\boldsymbol{B})]\\ 
+   &= tr[\boldsymbol{G}^\intercal (d\boldsymbol{A}\cdot \boldsymbol{B}+\boldsymbol{A}d\boldsymbol{B})]\\
    &= tr(\boldsymbol{BG}^\intercal d\boldsymbol{A}) + tr(\boldsymbol{G}^\intercal \boldsymbol{A} d\boldsymbol{B})
 \end{align}
 $$
@@ -183,7 +183,7 @@ go out可表熄灭的意思，这里的意思说的是，假设有一个模型�
 
 $$
 \begin{align}
-\widetilde{P}_{ensemble}(\tt{y}=\mathcal{y}|\boldsymbol{v}) 
+\widetilde{P}_{ensemble}(\tt{y}=\mathcal{y}|\boldsymbol{v})
 &\propto exp(\frac{1}{2^n}\sum_{\boldsymbol{d, d'} \in \{0,1\}^n}\boldsymbol{W}_{y,:}^\intercal ((\boldsymbol{d}+\boldsymbol{d'})\odot \boldsymbol{v} + \boldsymbol{b}_{\mathcal{y}}))\\
  &= exp(\frac{1}{2^n}\frac{2^n}{2}\boldsymbol{W}_{y,:}^\intercal \boldsymbol{v} + \boldsymbol{b}_{\mathcal{y}}) = exp(\frac{1}{2}\boldsymbol{W}_{y,:}^\intercal \boldsymbol{v} + \boldsymbol{b}_{\mathcal{y}})
 \end{align}
@@ -490,7 +490,7 @@ $$\frac{\partial}{\partial V_{l,a,b}}J(\boldsymbol{V},\boldsymbol{K}) = \sum_{i,
 
 实对称矩阵四大性质：1.不同特征值对应的特征向量都是正交的；2.特征值都是实数，特征向量都是实向量；3.必可对角化，且对角元素为特征值；4.如果存在k重特征值，则必有k个线性无关的特征向量。
 
-这里关于复数系数幅值的讨论，可以分别以```matrix(c(1,1,-1,1),2,2,T)```和 ```matrix(c(0.1,0.1,-0.1,0.1),2,2,T)```为例，反复乘以任一个二维向量并观察其变化。
+这里关于复数系数幅值的讨论，可以分别以```matrix(c(1,1,-1,1),2,2,T)```和 ```matrix(c(0.1,0.1,-0.1,0.1),2,2,T)```(R语言)为例，反复乘以任一个二维向量并观察其变化。
 
 ###10.10 长短期记忆和其它门控RNN
 
@@ -501,3 +501,21 @@ $$\frac{\partial}{\partial V_{l,a,b}}J(\boldsymbol{V},\boldsymbol{K}) = \sum_{i,
 *P.399*
 
 $$\sum_{i=1}^{|\mathbb{V}|}P(i|C)\frac{\partial a_i}{\partial \theta} = \sum_{i=1}^{|\mathbb{V}|} \frac{P(i|C)}{Q(i|C)}\frac{\partial a_i}{\partial \theta}Q(i|C) = \sum_{i=1}^{|\mathbb{V}|}\omega_i \frac{\partial a_i}{\partial \theta}Q(i|C) = E_Q[\omega_i \frac{\partial a_i}{\partial \theta}] \approx \frac{1}{m}\sum_{i=1}^{|\mathbb{V}|} \omega_i \frac{\partial a_i}{\partial \theta}$$
+
+#第三部分
+
+##第十三章 线性因子模型
+
+###13.2 独立成份分析
+
+*P.419*
+
+式3.47描述的模型用公式表示：$p_{\boldsymbol{h}}({\boldsymbol{h}}) = p_{\boldsymbol{x}}(\boldsymbol{W}^{-1}\boldsymbol{x})|det(\frac{\partial{\boldsymbol{W}^{-1}\boldsymbol{x}}}{\partial{\boldsymbol{x}}})| = p_{\boldsymbol{x}}(\boldsymbol{W}^{-1}\boldsymbol{x})|det((\boldsymbol{W^{-1}})^{\intercal})|$。所谓代价很高且不稳定的操作，一定程度上是指设计矩阵$\boldsymbol{W}$存在唯一解且可逆在真实情况中是十分少见的。如果不对其施加一定的约束，则通过计算式很难得到$p_{\boldsymbol{h}}({\boldsymbol{h}})$的估计。
+
+ICA的所有变种之所以要求$p(\boldsymbol{h})$是非高斯的，因为ICA本身就是一种线性模型。$\boldsymbol{x} = \boldsymbol{Wh}$就是最典型的线性变换，因而$p(\boldsymbol{h})$一定也是对应维度的线性平面。如果$p(\boldsymbol{h})$是高斯的，那么一定会具有$p(\boldsymbol{h}) \sim \exp[\boldsymbol{-\frac{1}{2} \cdot (Ax^2+Bx)}]$这样的结构(非线性)，这是很难用$\boldsymbol{W}$来进行直接表述的。
+
+关于非高斯分布在0附近有比高斯分布更高的峰值。可以用R的mvtnorm包进行验证，大多数情况下，如果均值向量偏离原点$\boldsymbol{0}$向量过多，而参数$\Sigma$的范数又不是非常大的情况下，用```rmvnorm()```去生成高维随机向量时，$\boldsymbol{0}$点附近的值几乎很难被取到。
+
+###13.3 慢特征分析
+
+SFA在深度非线性条件下预测学习特征，必须知道关于配置空间的环境动力。这种算法更像是一种对已有特理模型抓取的一个辅助参数，而却很难保证其自身的独立工作。“代价函数高度依赖于特定像素值”，简而言之就是图像中的对象(object)大多数情况下都是非线性的（比如书中所提到的斑马，在视频中需要获取其轮廓就是一个非线性对象）。先运用其它的图形技术将每一帧的轮廓选取出来，再用SFA算法训练来抓取慢性特征是可行的（运动规律，或者3D渲染环境某些程度上都会有一定的线性准则），然而直接对各帧的各像素点用SFA的话，很有可能每一帧都得到奇形怪状的轮廓，所以输出难以保证。
