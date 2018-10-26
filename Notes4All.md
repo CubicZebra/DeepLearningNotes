@@ -683,3 +683,29 @@ d-分离可以看成条件推断的阻塞。在给定$c$的情况下，明确$p(
 Gibbs采样是基于多元高斯分布的随机生成方法。之所以说理论上Gibbs采样是最简单的方法，是因为其具备两个特点：一、它是特化的，接受率为1的Metropolis-Hastings算法，因此不存在舍弃样本的问题；二、它的所有满条件分布都会退化成某一个特定的一元正态分布，并且参数十分都是很容易计算的，因此只要应用正态分布的随机生成器就可以进行更新参数的过程。
 
 注：$p(x_i|x_{-i})$所表示的就是$x_i$的满条件分布。
+
+###16.7 结构化概率模型的深度学习方法
+
+*P.499*
+
+注意，$\boldsymbol{v}^\intercal \boldsymbol{W}_{:,i}$中的$\boldsymbol{W}_{:,i}$是一个具体的向量，与$\boldsymbol{v}$的内积为一标量。
+
+$\frac{\partial}{\partial \boldsymbol W} E(\boldsymbol{v}, \boldsymbol h) = -\boldsymbol{vh}^\intercal$，因此$\frac{\partial}{\partial W_{i,j}} E(\boldsymbol{v}, \boldsymbol h) = - v_i h_j$。
+
+##第十七章 蒙特卡罗方法
+
+###17.2 重要采样
+
+*P.503*
+
+式17.8的意义在于，$p(\boldsymbol x)$并不一定是一个很标准的多维随机分布，因而很难从$p(\boldsymbol x)$生成随机数来对$f(\boldsymbol x)$作出估计。而改写成：
+
+$$p(\boldsymbol x)f(\boldsymbol x) = q(\boldsymbol x)\frac{p(\boldsymbol x)f(\boldsymbol x)}{q(\boldsymbol x)} = q(\boldsymbol x) f^\prime (\boldsymbol x)$$
+
+后，$q(\boldsymbol x)$可以来自于一个简单的多维分布，例如多元高斯分布。用这种情况下生成的随机数去估计$f^\prime$，与用$p(\boldsymbol x)$（样本分布）的随机数来估计$f$是等效的。
+
+###17.3 马尔可夫链蒙特卡罗方法
+
+*P.508*
+
+尽量消除样本间的相关性，是基于“独立同分布”的假设。一般作ACF图诊断，随着间隔样本数的增加，样本间的自相关性也呈下降的趋势。但由于间隔样本数的增加，以马尔可夫链为基础生成随机数的方法需要舍弃大量样本，因此计算代价也非常高。
