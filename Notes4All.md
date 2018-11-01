@@ -725,3 +725,27 @@ $$p(\boldsymbol x)f(\boldsymbol x) = q(\boldsymbol x)\frac{p(\boldsymbol x)f(\bo
 两个for循环里的内容相当于体系随机游走了k步，这里用了吉布斯算法针对每一个样本来进行更新。“设吉布斯步数k大到足以让从p采样的马尔可夫链磨合”。MCMC方法会存在初始值和预烧期(burn-in period)，根据初始值的设定的不同，预烧期所持续的时间也可能会不一样。当采样过了预烧期过后，马氏链才会趋于稳定。
 
 对比算法18.1~18.3，其区别在于：第一个使用随机初始值，第二个使用样本初始值，第三个针对样本使用随机初始化（while循环中不会涉及重置马氏链，经过一定次数的循环后基本能保证马氏链走出预烧期）。
+
+###18.4 得分匹配和比率匹配
+
+*P.525*
+
+式18.22原书中写法为$L(\boldsymbol x, \boldsymbol{\theta}) = 0.5 ||\nabla_{\boldsymbol x}log\ p_{model}(\boldsymbol x; \boldsymbol{\theta}), -\nabla_{\boldsymbol x}log\ p_{data}(\boldsymbol x)||_2^2$，意为从$\nabla_{\boldsymbol x}log\ p_{model}(\boldsymbol x; \boldsymbol{\theta})$到$-\nabla_{\boldsymbol x}log\ p_{data}(\boldsymbol x)$的欧氏距离的平方。式18.25根据此结果推断出来。但根据原文*"the expected squared diﬀerence between the derivatives of themodel’s log density with respect to the input and the derivatives of the data’s logdensity with respect to the input"*推测式18.22其中的二范数应为$\nabla_{\boldsymbol x}log\ p_{model}(\boldsymbol x; \boldsymbol{\theta}) -\nabla_{\boldsymbol x}log\ p_{data}(\boldsymbol x)$。
+
+在Hyvarinen的论文里，得分函数被定义为（原论文中变量用$\boldsymbol{\xi}$表示，数据用$\boldsymbol x$表示）：
+
+$$
+\boldsymbol{\psi}(\boldsymbol{x}; \boldsymbol{\theta}) =
+\begin{bmatrix}
+    \frac{\partial log\ p(\boldsymbol{x}; \boldsymbol{\theta})}{\partial x_1} \\
+    \vdots \\
+    \frac{\partial log\ p(\boldsymbol{x}; \boldsymbol{\theta})}{\partial x_n}
+\end{bmatrix} =
+\begin{bmatrix}
+    \psi_1(\boldsymbol{x}; \boldsymbol{\theta})\\
+    \vdots \\
+    \psi_n(\boldsymbol{x}; \boldsymbol{\theta})
+\end{bmatrix} = \nabla_{\boldsymbol{x}}log\ p(\boldsymbol x; \boldsymbol{\theta})
+$$
+
+所以:
