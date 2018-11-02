@@ -748,4 +748,20 @@ $$
 \end{bmatrix} = \nabla_{\boldsymbol{x}}log\ p(\boldsymbol x; \boldsymbol{\theta})
 $$
 
-所以:
+所以式18.22也可以写为:
+
+$$
+\begin{align}
+L(\boldsymbol x, \boldsymbol{\theta}) = &\frac{1}{2}||\boldsymbol{\psi}(\boldsymbol x, \boldsymbol{\theta})-\boldsymbol{\psi_{data(x)}}(\boldsymbol x)||_2^2
+\end{align}
+$$
+
+式18.25的由来需要$\boldsymbol{\psi}$可微，并且附加一些弱正则化条件。
+
+##第十九章 近似推断
+
+###19.3 最大后验推断和稀疏编码
+
+*P.541*
+
+当$\boldsymbol h \equiv \boldsymbol{\mu}$时，$\int q(\boldsymbol h | \boldsymbol v) = \int \delta (\boldsymbol h - \boldsymbol{\mu}) = 1$。
