@@ -765,3 +765,75 @@ $$
 *P.541*
 
 当$\boldsymbol h \equiv \boldsymbol{\mu}$时，$\int q(\boldsymbol h | \boldsymbol v) = \int \delta (\boldsymbol h - \boldsymbol{\mu}) = 1$。
+
+###19.4 变分推断和变分学习
+
+####19.4.1 离散型潜变量
+
+*P.547*
+
+因为$\boldsymbol h$是贝努利的，所以根据sigmoid函数的对称性，式19.19隐含着条件：$p(h_i = 0) = 1 - \sigma(b_i) = \sigma(-b_i)$，所以：
+
+$$
+\begin{align}
+&\mathbb{E}_{\boldsymbol{h} \sim q}[\sum_{i=1}^m \log p(\boldsymbol{h}_i) - \sum_{i=1}^m \log q(h_i | \boldsymbol{v})]\\
+= &\sum_{i=1}^m[\sigma(b_i)[\log \sigma(b_i) - \log \hat{h}_i] + \sigma(-b_i)[\log \sigma(-b_i) - \log(1-\hat{h}_i)]]\\
+= &\sum_{i=1}^m[\hat{h}_i[\log \sigma(b_i) - \log \hat{h}_i] + (1 - \hat{h}_i)[\log \sigma(-b_i) - \log(1-\hat{h}_i)]]
+\end{align}
+$$
+
+另，原书和翻译中的式19.34中中括号里的值展开后为：
+
+$$\frac{1}{2}\sum_{i=1}^{n}[\log\frac{\beta_i}{2\pi}-\beta_i(v_i^2 - 2v_i\boldsymbol{W_{i,:}\boldsymbol{h}}+\sum_j[W_{i,j}^2h_j^2 + 2 \sum_{k \neq j}W_{i,j}h_j W_{i,k}h_k])]$$
+
+其实容易理解，$\boldsymbol{W}_{i,:}$和$\boldsymbol{h}$都是向量，最后一项为向量内积的平方。考虑两向量$\boldsymbol x = (x_1, x_2, x_3)$和$\boldsymbol y = (y_1, y_2, y_3)$，两向量内积为$\boldsymbol{xy} = x_1 y_1 + x_2 y_2 + x_3 y_3$，内积的平方一定为$(x_1 y_1)^2 + (x_2 y_2)^2 + (x_3 y_3)^2 + 2x_1 y_1 x_2 y_2 + 2x_2 y_2 x_3 y_3 + 2 x_1 y_1 x_3 y_3$
+
+
+式19.34到式19.36的变换如下所示：
+
+$$
+\begin{align}
+&\mathbb{E}_{\boldsymbol{h} \sim q}[\sum_{i=1}^n \log \sqrt{\frac{\beta_i}{2\pi}}\exp(-\frac{\beta_i}{2}(v_i - \boldsymbol{W}_{i,:}\boldsymbol{h})^2)] \\
+= \frac{1}{2} &\mathbb{E}_{\boldsymbol{h} \sim q}[\sum_{i=1}^n \log \frac{\beta_i}{2\pi}-\beta_i(v_i^2 - 2v_i\sum_j W_{i,j} h_j + \sum_j[W_{i,j}^2h_j^2 + 2 \sum_{k \neq j} W_{i,j} h_j W_{i,k} h_k])]
+\end{align}
+$$
+
+因为$h_i$是贝努利的，所以$\mathbb{E}_{h_i}[h_i] = \hat{h}_i$且$\mathbb{E}_{h_i}[h_i^2] = \mathbb{D}_{h_i}[h_i] + (\mathbb{E}_{h_i}[h_i])^2 = \hat{h}_i(1-\hat{h_i}) + \hat{h}_i^2 = \hat{h}_i$，由于做过均值场近似，因此上式又写作：
+
+$$
+\begin{align}
+&\frac{1}{2} [\sum_{i=1}^n \log \frac{\beta_i}{2\pi}-\beta_i(v_i^2 - 2v_i\sum_j W_{i,j} \mathbb{E}_{h_j}[h_j] + \sum_j[W_{i,j}^2 \mathbb{E}_{h_j} [h_j^2] + 2 \sum_{k \neq j} W_{i,j} \mathbb{E}_{h_j} [h_j] W_{i,k} \mathbb{E}_{h_k} [h_k]])]\\
+= &\frac{1}{2} [\sum_{i=1}^n \log \frac{\beta_i}{2\pi}-\beta_i(v_i^2 - 2v_i\sum_j W_{i,j} \hat{h}_j + \sum_j[W_{i,j}^2 \hat{h}_j + 2 \sum_{k \neq j} W_{i,j} \hat{h}_j W_{i,k} \hat{h}_k])]\\
+= &\frac{1}{2} \sum_{i=1}^n [\log \frac{\beta_i}{2\pi}-\beta_i(v_i^2 - 2v_i\boldsymbol{W}_{i,:}\hat{\boldsymbol h} + \sum_j[W_{i,j}^2 \hat{h}_j + 2 \sum_{k \neq j} W_{i,j} \hat{h}_j W_{i,k} \hat{h}_k])]
+\end{align}
+$$
+
+因此式19.36以及下面的一系列计算中，最后一项都缺了一个系数2。（但式19.43及以后却又是正确的结果）。
+
+####19.4.2 变分法
+
+*P.552*
+
+拉格朗日泛函（式19.50）从$\lambda_1$到$\lambda_3$分别添加的限制条件为：$p(x)$是归一化的概率分布，均值为$\mu$，方差固定为$\sigma^2$。
+
+$$
+\begin{align}
+\frac{\delta}{\delta p(x)} \mathcal{L} &= \frac{\delta}{\delta p(x)} [\int g_1(p(x), x)dx + C] = \frac{\delta}{\delta p(x)} g_1(p(x), x)\\
+ &= \lambda_1 + \lambda_2 x + \lambda_3 (x - \mu)^2 - \log p(x) - 1
+\end{align}
+$$
+
+式19.53中$\lambda$的取值只需要将该式因子化：
+
+$$
+\begin{align}
+p(x) &= \exp(\lambda_1 + \lambda_2 x + \lambda_3 (x - \mu)^2 - 1) \\
+&= \exp[\lambda_1 + \lambda_2 \mu - \frac{\lambda_2^2}{3\lambda_3} - 1]\exp[-\frac{1}{2(-2\lambda_3)^{-1}}[x - ( \mu - \frac{\lambda_2}{2\lambda_3})]^2]
+\end{align}
+$$
+
+所以$-2\lambda_3 = (\sigma^2)^{-1}$则有$\lambda_3 = 1/(2\sigma^2)$；$(\mu - \lambda_2/(2\lambda_3)) = \mu$则有$\lambda_2 = 0$；因此$\exp[\lambda_1 + \lambda_2 \mu - \lambda_2^2/(3\lambda_3) - 1] = \exp[\lambda_1 - 1] = 1/(\sqrt{2\pi}\sigma)$所以$\lambda_1 = 1 - \log \sigma \sqrt{2\pi}$。
+
+*P.554*
+
+只要在$p(x)$的核中存在如$\exp[-0.5(Ax^2 + Bx)]$的形式，则$p(x)$必满足某一高斯分布，多元的情况下把括号内内空改成二次型和内积形式。具体推导过程点[这里](https://github.com/CubicZebra/MVNBayesian/blob/master/Introduction/Introduction%20to%20MVNBayesian.pdf)。
