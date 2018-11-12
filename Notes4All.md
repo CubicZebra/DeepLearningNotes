@@ -836,4 +836,12 @@ $$
 
 *P.554*
 
-只要在$p(x)$的核中存在如$\exp[-0.5(Ax^2 + Bx)]$的形式，则$p(x)$必满足某一高斯分布，多元的情况下把括号内内空改成二次型和内积形式。具体推导过程点[这里](https://github.com/CubicZebra/MVNBayesian/blob/master/Introduction/Introduction%20to%20MVNBayesian.pdf)。
+只要在$p(x)$的核中存在如$\exp[-0.5(Ax^2 + Bx)]$的形式，则$p(x)$必满足某一高斯分布，多元的情况下把括号内内空改成二次型和内积形式。具体推导过程参考[这里](https://github.com/CubicZebra/MVNBayesian/blob/master/Introduction/Introduction%20to%20MVNBayesian.pdf)。
+
+##第二十章 深度生成模型
+
+###20.2 受限玻尔兹曼机
+
+*P.560*
+
+因为是受限玻尔兹曼机，$\boldsymbol h$与$\boldsymbol h$之间，$\boldsymbol v$与$\boldsymbol v$之间都不存在任何连接，式20.3中的$-\boldsymbol{v^{\intercal}R}v$与$-\boldsymbol{h^{\intercal}S}h$都为0，变成式20.5的形式。
