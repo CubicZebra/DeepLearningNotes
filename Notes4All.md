@@ -836,7 +836,7 @@ $$
 
 *P.554*
 
-只要在$p(x)$的核中存在如$\exp[-0.5(Ax^2 + Bx)]$的形式，则$p(x)$必满足某一高斯分布，多元的情况下把括号内内空改成二次型和内积形式。具体推导过程参考[这里](https://github.com/CubicZebra/MVNBayesian/blob/master/Introduction/Introduction%20to%20MVNBayesian.pdf)。
+只要在$p(x)$的核中存在如$\exp[-0.5(Ax^2 + Bx)]$的形式，则$p(x)$必满足某一高斯分布，多元的情况下把括号内内容改成二次型和内积形式。具体推导过程参考[这里](https://github.com/CubicZebra/MVNBayesian/blob/master/Introduction/Introduction%20to%20MVNBayesian.pdf)。
 
 ##第二十章 深度生成模型
 
@@ -845,3 +845,28 @@ $$
 *P.560*
 
 因为是受限玻尔兹曼机，$\boldsymbol h$与$\boldsymbol h$之间，$\boldsymbol v$与$\boldsymbol v$之间都不存在任何连接，式20.3中的$-\boldsymbol{v^{\intercal}R}v$与$-\boldsymbol{h^{\intercal}S}h$都为0，变成式20.5的形式。
+
+####20.2.1 条件分布
+
+*P.562*
+
+式20.10有问题，原书中为：
+
+$$\frac{1}{Z^\prime}\exp\{\sum_{j=1}^{n_h}c_j h_j + \sum_{j=1}^{n_h}\boldsymbol{v}^\intercal\boldsymbol{W}_{:,j}\boldsymbol{h}_j\}$$
+
+从式20.11完全导出式20.15的过程推导如下（必须用原书中的形式）：
+
+$$
+\begin{align}
+P(\boldsymbol h | \boldsymbol v) &= \frac{P(\boldsymbol h, \boldsymbol v)}{\sum_{\boldsymbol h} P(\boldsymbol h, \boldsymbol v)} = \frac{\exp[\boldsymbol c^\intercal \boldsymbol h + \boldsymbol v^\intercal \boldsymbol{Wh}]}{\sum_{\boldsymbol h \in \{0,1\}^j}\exp[\boldsymbol c^\intercal \boldsymbol h + \boldsymbol v^\intercal \boldsymbol{Wh}]}\\
+&= \frac{\prod_{j}\exp[c_j h_j + \boldsymbol v^\intercal \boldsymbol W_{:,j} h_j]}{\prod_{j} \sum_{h_j \in \{0,1\}} \exp[c_j h_j + \boldsymbol v^\intercal \boldsymbol W_{:,j} h_j]}\\
+&= \prod_{j} \frac{\exp[(c_j + \boldsymbol v^\intercal \boldsymbol W_{:,j}) h_j]}{\exp[0] + \exp[c_j + \boldsymbol v^\intercal \boldsymbol W_{:,j}]}\\
+&= \prod_{j} \frac{\exp[T_j h_j]}{\exp[T_j(1 - h_j)]\exp[T_j(h_j - 1)](1 + \exp[T_j])}\\
+&= \prod_{j} \frac{\exp[T_j (2h_j - 1)]\exp[T_j (1 - h_j)]}{\exp[T_j(1 - h_j)]\{\exp[T_j(h_j - 1)] + \exp[T_j h_j]\}}\\
+&= \prod_{j} \frac{\exp[T_j (2h_j - 1)]}{\exp[T_j(h_j - 1)] + \exp[T_j h_j]}\\
+\end{align}
+$$
+
+因为$h_j$是二值的，当$h_j = 0$或$1$时，上式分别为$\exp[-T_j]/(\exp[-T_j] + 1)$和$T_j/(1 + \exp[T_j])$，此时仍为$\sigma$函数，所以可写作$(2\boldsymbol h)$与$(\boldsymbol c + boldsymbol W^\intercal \boldsymbol v)$的Hadamard乘积的$\sigma$函数其实是等效的。
+
+$\boldsymbol v \in \{0,1\}^i$也是二值的，式20.16也同理。
