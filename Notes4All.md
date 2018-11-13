@@ -850,9 +850,9 @@ $$
 
 *P.562*
 
-式20.10有问题，原书中为：
+式20.10有问题（原书中也有误），正确形式应为：
 
-$$\frac{1}{Z^\prime}\exp\{\sum_{j=1}^{n_h}c_j h_j + \sum_{j=1}^{n_h}\boldsymbol{v}^\intercal\boldsymbol{W}_{:,j}\boldsymbol{h}_j\}$$
+$$\frac{1}{Z^\prime}\exp\{\sum_{j=1}^{n_h}c_j h_j + \sum_{j=1}^{n_h}\boldsymbol{v}^\intercal\boldsymbol{W}_{:,j}h_j\}$$
 
 从式20.11完全导出式20.15的过程推导如下（必须用原书中的形式）：
 
@@ -867,6 +867,6 @@ P(\boldsymbol h | \boldsymbol v) &= \frac{P(\boldsymbol h, \boldsymbol v)}{\sum_
 \end{align}
 $$
 
-因为$h_j$是二值的，当$h_j = 0$或$1$时，上式分别为$\exp[-T_j]/(\exp[-T_j] + 1)$和$T_j/(1 + \exp[T_j])$，此时仍为$\sigma$函数，所以可写作$(2\boldsymbol h)$与$(\boldsymbol c + boldsymbol W^\intercal \boldsymbol v)$的Hadamard乘积的$\sigma$函数其实是等效的。
+因为$h_j$是二值的，当$h_j$分别为$0$或$1$时，上式分别为$\exp[-T_j]/(\exp[-T_j] + 1)$和$T_j/(1 + \exp[T_j])$，此时仍为$\sigma$函数，所以可写作$(2\boldsymbol h - 1)$与$(\boldsymbol c + \boldsymbol W^\intercal \boldsymbol v)$的Hadamard乘积的$\sigma$函数其实是等效的。
 
-$\boldsymbol v \in \{0,1\}^i$也是二值的，式20.16也同理。
+$\boldsymbol v \in \{0,1\}^i$也是二值的，式20.16也同理。
