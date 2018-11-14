@@ -867,6 +867,12 @@ P(\boldsymbol h | \boldsymbol v) &= \frac{P(\boldsymbol h, \boldsymbol v)}{\sum_
 \end{align}
 $$
 
-因为$h_j$是二值的，当$h_j$分别为$0$或$1$时，上式分别为$\exp[-T_j]/(\exp[-T_j] + 1)$和$T_j/(1 + \exp[T_j])$，此时仍为$\sigma$函数，所以可写作$(2\boldsymbol h - 1)$与$(\boldsymbol c + \boldsymbol W^\intercal \boldsymbol v)$的Hadamard乘积的$\sigma$函数其实是等效的。
+因为$h_j$是二值的，当$h_j$分别为$0$或$1$时，上式分别为$\exp[-T_j]/(\exp[-T_j] + 1)$和$T_j/(1 + \exp[T_j])$，这两者仍为$\sigma$函数，所以可写作$(2\boldsymbol h - 1)$与$(\boldsymbol c + \boldsymbol W^\intercal \boldsymbol v)$的Hadamard乘积的$\sigma$函数其实是等效的。
 
 $\boldsymbol v \in \{0,1\}^i$也是二值的，式20.16也同理。
+
+###20.4 深度玻尔兹曼机
+
+*P.567*
+
+深度信念网络（DBN）和深度玻尔兹曼机（DBM）的一大不同：前者的计算是逐层的，我们可以利用简单的正向计算与反向求梯度进行两个方向上的传播与更新，但这个计算过程在当前层未完成时，下一层的计算是无法开启的；而后者由于条件独立的情况，计算都是并行展开的，无论设置的层数如何，两步内都可以实现整个网络完全的更新。
