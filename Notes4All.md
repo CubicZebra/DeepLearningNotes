@@ -878,3 +878,164 @@ $\boldsymbol v \in \{0,1\}^i$也是二值的，式20.16也同理。
 深度信念网络（DBN）和深度玻尔兹曼机（DBM）的一大不同：前者的计算是逐层的，我们可以利用简单的正向计算与反向求梯度进行两个方向上的传播与更新，但这个计算过程在当前层未完成时，下一层的计算是无法开启的；而后者由于条件独立的情况，计算都是并行展开的，无论设置的层数如何，两步内都可以实现整个网络完全的更新。
 
 *P.572*
+
+计算玻尔兹曼机期望值的困难在于，各单元的随机变量之间存在各种各样复杂的关联，易辛模型（ising model）给出的物理解释是，在微观粒子自旋时会存在相互作用，于是就变成了复杂的多体问题。用来提示这些相互作用的，正是哈密顿能量函数（Hamiltonian）中不同单元之间乘以其混合权重的项：
+
+$$-\sum_{i,j} w_{i,j} x_i x_j \tag{1}$$
+
+究其原因，是考虑当所有权重都变为$0$时，玻尔兹曼分布将会变成：
+
+$$P(\boldsymbol x | \boldsymbol{\theta}) = \frac{1}{Z(\boldsymbol{\theta})}e^{\sum_i b_i x_i} = \prod_i \frac{e^{b_i x_i}}{1 + e^{b_i}} \tag{2}$$
+
+这时就变为了独立的单变量分布之间乘积这样简单的问题了。也就是说这时的玻尔兹曼机的计算会退化成简单的一体问题。暂先不管这个使期望值计算极度简化的玻尔兹曼机，我们先准备一个各个随机变量相互独立的概率分布模型（试验分布，test distribution）集合。然后我们从这样的集合当中探索出最接近玻尔兹曼机的一个概率分布出来。当然$w_{i,j}=0$的分布由于过于简单必然不是问题的最优解。那么我们怎样去找出这样一种概率分布呢？
+
+首先，由于试验分布所有变量相互独立，我们可以写出其分布的一般情形：
+
+$$Q(\boldsymbol x) = \prod_i Q_i(x_i) \tag{3}$$
+
+这样一来每一个$Q_i(x_i)$都对应着一个单变量的概率分布，只是$Q_i(x_i)$的具体形式我们现在还无从知晓罢了。我们从这个分布函数$Q(\boldsymbol x)$来针对接近玻尔兹曼机的条件来进行优化。首先考虑$Q(\boldsymbol x)$是我们的试验分布，$P(\boldsymbol x | \boldsymbol{\theta})$是目标玻尔兹曼分布，考虑KL散度是两分布间的距离，要让它们更为相似，则使KL散度最小即可。试验分布$Q$对玻尔兹曼机$P$的KL散度为：
+
+$$D_{KL}(Q||P) = \sum_{\boldsymbol x} Q(\boldsymbol x) \log \frac{Q(\boldsymbol x)}{P(\boldsymbol x | \boldsymbol{\theta})} \tag{4}$$
+
+但需要注意的是，这并不是一个无约束的目标函数，因为对于任意的$i$都需要满足以下的等式约束：
+
+$$\sum_{x_i = 0,1} Q_i(x_i) = 1 \tag{5}$$
+
+由于$Q_i(x_i)$不是随机变量而是某个函数，因而我们可以写出式(4)满足式(5)约束条件的拉格朗日泛函：
+
+$$\mathcal{L}[Q_i; \Lambda_i] = D_{KL}(Q||P) + \sum_i \Lambda_i (\sum_{x_i = 0,1} Q_i(x_i) - 1) \tag{6}$$
+
+这里$\Lambda_i$是$\mathcal L$的拉格朗日系数。用$\mathcal L$对$\Lambda_i$求变分，其结果一定满足以下约束条件：
+
+$$0 = \frac{\partial \mathcal L}{\partial \Lambda_i} = \sum_{x_i = 0,1} Q_i (x_i) - 1 \tag{7}$$
+
+然后再用$\mathcal L$对$Q_i(x_i)$求变分。因为：
+
+$$
+\begin{align}
+\mathcal L &= \sum_{\boldsymbol x} Q(\boldsymbol x)\log\frac{Q(\boldsymbol x)}{P(\boldsymbol x | \boldsymbol{\theta})} + \sum_i \Lambda_i (\sum_{x_i = 0,1} Q_i(x_i) - 1)\\
+&= \sum_{\boldsymbol x} \prod_i Q_i(x_i)[\sum_i\log Q_i(x_i) - \log P(\boldsymbol x | \boldsymbol{\theta})]\\
+&=  \sum_{x_i} Q_i(x_i)\{\prod_{j(\neq i)} Q_j(x_j)[\sum_i\log Q_i(x_i) - \log P(\boldsymbol x | \boldsymbol{\theta})]\}\\
+&\quad+ \sum_{\boldsymbol{x}_{-i}} \prod_{j(\neq i)} Q_j(x_j)[Q_i (x_i)][\log Q_i (x_i) + \sum_{j(\neq i)}\log Q_j(x_j) - \log P(\boldsymbol x | \boldsymbol{\theta})]
+\tag{8}
+\end{align}
+$$
+
+针对前一项
+
+$$
+\sum_{x_i} Q_i(x_i)\{\prod_{j(\neq i)} Q_j(x_j)[\sum_i\log Q_i(x_i) - \log P(\boldsymbol x | \boldsymbol{\theta})]\} \\
+= \sum_{x_i} Q_i(x_i) T_i = E_{x_i \sim Q_i} [T_i] \tag{9}$$
+
+可以直接将其视为不变量，因此有：
+
+$$
+\begin{align}
+0 = \frac{\delta \mathcal L}{\delta Q_i(x_i)}
+&= \sum_{\boldsymbol{x}_{-i}} \prod_{j(\neq i)} Q_j(x_j)[\log Q_i (x_i) + \sum_{j(\neq i)}\log Q_j(x_j) \\
+&\quad- \log P(\boldsymbol x | \boldsymbol{\theta}) + Q_i(x_i)\frac{1}{Q_i(x_i)}] + \Lambda_i\\
+&= \sum_{\boldsymbol{x}_{-i}} \prod_{j(\neq i)} Q_j(x_j)[\sum_{k}\log Q_k(x_k) - \log P(\boldsymbol x | \boldsymbol{\theta}) + 1] + \Lambda_i
+\tag{10}
+\end{align}
+$$
+
+对于式（10）中括号最左边的一项而言，将其中的第$i$项乘出来以后，联立式（7）的结论有有：
+
+$$\sum_{\boldsymbol{x}_{-i}} \prod_{j(\neq i)} Q_j(x_j) \log Q_i(x_i) = \log Q_i(x_i) \prod_{j(\neq i)} (\sum_{x_j} Q_j (x_j)) = \log Q_i(x_i) \tag{11}$$
+
+对于那些$k \neq i$的部分，由于与$i$不直接关联，将这部分值视为常数即可。然后对式（10）中中括号内的第二项，乘出来并代入玻尔兹曼机的一般形，有：
+
+$$
+\sum_{\boldsymbol{x}_{-i}} \prod_{j(\neq i)} Q_j(x_j) P(\boldsymbol x | \boldsymbol{\theta}) = \sum_{\boldsymbol{x}_{-i}} \prod_{j(\neq i)} Q_j(x_j)[\sum_k b_k x_k + \sum_{j,k} w_{j,k} x_j x_k - \log Z]\\
+= \sum_{\boldsymbol{x}_{-i}} \prod_{j(\neq i)} Q_j(x_j)[b_i x_i + \sum_{k (\neq i)} b_k x_k + \sum_{j(\neq i)} w_{j,i} x_j x_i + \sum_{j(\neq k)} \sum_{k(\neq i)} w_{j,k} x_j x_k - \log Z]\\
+\tag{12}
+$$
+
+对于所有$j$，将试验分布中任意的$x_j$的期望引入（也就是所谓的平均场，mean field），也就是：
+
+$$\mu_j = \sum_{\boldsymbol x} x_j Q(\boldsymbol x) = \sum_{x_j = 0,1} x_j Q_j(x_j) \tag{13}$$
+
+可以将式（12）中中括号里逐项分别乘出来并化简，第一项与最后一项的操作过程如式（11）所示不再赘述，其余化简过程分别如下:
+
+$$
+\sum_{\boldsymbol{x}_{-i}} \prod_{j(\neq i)} Q_j(x_j) \sum_{k(\neq i)} b_k x_k = \sum_{x_j} \sum_{\boldsymbol{x}_{-i,j}} \prod_{m(\neq i,j)} Q_m(x_m) Q_j(x_j) \sum_{j(\neq i)} b_j x_j\\
+= \sum_{j(\neq i)} b_j \sum_{x_j} Q_j(x_j) x_j \cdot [\prod_{m(\neq i,j)} (\sum_{x_m} Q_m(x_m))] = \sum_{j(\neq i)} b_j \mu_j
+$$
+
+第三项同理：
+
+$$
+\sum_{\boldsymbol{x}_{-i}} \prod_{j(\neq i)} Q_j(x_j) \sum_{j(\neq i)} w_{j,i} x_j x_i = x_i \sum_{x_j} \sum_{\boldsymbol{x}_{-i,j}} \prod_{m(\neq i,j)} Q_m(x_m) w_{i,j} \sum_{j(\neq i)} Q_j(x_j) x_j\\
+= x_i \sum_{j(\neq i)} w_{i,j} \sum_{x_j} Q_j(x_j) x_j \cdot [\prod_{m(\neq i,j)} (\sum_{x_m} Q_m(x_m))] = x_i \sum_{j(\neq i)} w_{i,j} \mu_j
+$$
+
+第四项略复杂：
+
+$$
+\sum_{\boldsymbol{x}_{-i}} \prod_{j(\neq i)} Q_j(x_j) \sum_{j(\neq k)} \sum_{k(\neq i)} w_{j,k} x_j x_k\\
+= \sum_{x_j} \sum_{x_k} \sum_{\boldsymbol{x}_{-i,j,k}} \prod_{m(\neq i,j,k)} Q_m(x_m) \sum_{j(\neq k)} \sum_{k(\neq i)} w_{j,k} x_j x_k Q_j(x_j) Q_k(x_k)\\
+= \sum_{j(\neq k)} \sum_{k(\neq i)} w_{j,k} \sum_{x_j} Q_j(x_j)x_j \sum_{x_k} Q_k(x_k)x_k[\prod_{m(\neq i,j,k)} (\sum_{x_m} Q_m(x_m))]\\
+= \sum_{j,k(\neq i)} w_{j,k} \mu_j \mu_k
+$$
+
+值得注意的是，第二项，第四项和第五项由于不存在与$i$相关的变量，因此在计算过程中可以并入一个常数项，所以式（10）又可以写成：
+
+$$
+0 = \log Q_i(x_i) - (b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} \mu_j)x_i + C + \Lambda_i \tag{14}
+$$
+
+其中C是一个与$i$无关的常数，$\mathcal N_i$是与$x_i$相邻接的所有节点的集合（只有满足这种情况时$w_{i,j}$不为$0$）。解式（14）可知，$Q_i(x_i)$一定具有如下形式的核函数：
+
+$$Q_i (x_i) \propto e^{-\Lambda_i}e^{(b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} \mu_j)x_i} \tag{15}$$
+
+另外，由于对拉格朗日系数$\Lambda_i$变分的限制条件存在，所以：
+
+$$\sum_{x_i} Q_i(x_i) = 1 \tag{16}$$
+
+由于$x_i$是二值的，不妨设$Q_i (x_i) = Ce^{-\Lambda_i}e^{(b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} \mu_j)x_i} = Ce^{-\Lambda_i}e^{T_i x_i}$，联立式（15）和式（16）后显然有：
+
+$$
+\begin{align}
+1 &= Ce^{-\Lambda_i} + Ce^{-\Lambda_i}e^{T_i}\\
+e^{-\Lambda_i} &= C^{-1}(1 + e^{T_i})^{-1}\\
+\therefore Q_i(x_i) &= C\cdot[C^{-1}(1 + e^{T_i})^{-1}]e^{T_i x_i}\\
+&= \frac{e^{T_i x_i}}{1 + e^{T_i}} = \frac{e^{(b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} \mu_j)x_i}}{1 + e^{b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} \mu_j}}\\
+\tag{17}
+\end{align}
+$$
+
+对比$x_i$的满条件分布$\phi$：
+
+$$
+\begin{align}
+P(x_i | \boldsymbol x_{-i}, \boldsymbol{\theta}) &= \frac{P(\boldsymbol x, \boldsymbol{\theta})}{\sum_{x_i = 0, 1} P(\boldsymbol x, \boldsymbol{\theta})} = \frac{e^{- \boldsymbol \phi (\boldsymbol x, \boldsymbol \theta)}}{\sum_{x_i = 0,1} e^{- \boldsymbol \phi (\boldsymbol x, \boldsymbol \theta)}}\\
+&= \frac{e^{(b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} x_j)x_i}}{1 + e^{b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} x_j}}
+\tag{18}
+\end{align}
+$$
+
+比较式（18）与式（17）不难发现，我们所说的“平均场近似”名字的由来，正是基于“在讨论变量$i$时，将其它无关的随机变量$x_j$全部换成其平均值（期望值）$\mu_j$”这样的想法。在统计物理里，为了使近似的意思更加明确，会引入更严密的推导过程，这里不作展开。现在虽然已经写出了$Q_i(x_i)$的具体表达式，但如果涉及具体计算，就需要知道所有与$x_i$临接的$x_j$的期望值，如果想要知道它们的期望值，就需要去计算每一个$x_j$的概率分布，这样一来计算会以一个节点展来没完没了，为了使全体定义不相矛盾，可以作出假设对任意的$i$都有$Q_i(x_i = 1) = \mu_i$，因此有：
+
+$$\mu_i = \frac{e^{b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} \mu_j}}{1 + e^{b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} \mu_j}} = \sigma(b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} \mu_j) \tag{19}$$
+
+这正是自洽场方程式。物理上易辛模型使用的自洽场方程是双曲正切函数$\tanh(\cdot)$，这里使用的$\sigma$函数是由于对$x_i$作了二值假设$x_i \in \{0,1\}$，实质上两者并无本质区别。
+
+因此自洽场方程，就是求出平均场值$\mu_i$的决定性方程，解开了它那么原概率分布的具体参数也就能够确定下来了。但由于自洽场方程组是联立的非线性方程，很难求出其解析解的形式，所以通常采用数值方法求算。一般地，我们给定$\boldsymbol \mu (0)$一组随机初始值：
+
+$$\mu_1(0), \mu_2(0), ..., \mu_M(0) \tag{20}$$
+
+然后利用对于每一步$t=1,2,3,...$，依次迭代计算：
+
+$$\mu_i(t) = \sigma(b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} \mu_j(t-1)) \tag{21}$$
+
+收敛后的结果一般都可以作为平均场方程组的数值解。
+
+不难看出，算法20.1在吉布斯采样开始前计算的$\Delta_{\boldsymbol{W}^{(1)}}$与$\Delta_{\boldsymbol{W}^{(2)}}$都是在计算当前式（20.35）对权重矩阵的梯度。经一组吉布斯采样后，由于$\boldsymbol{V}$，$\boldsymbol{H^{(1)}}$，$\boldsymbol{H^{(2)}}$都发生了变化，于是式（20.35）对权重产生了新的梯度，两梯度相减得出梯度的变化，乘以学习率之后加在原权重上使权重向“使深度玻尔兹曼机整体能量更小的方向”产生变化。
+
+####20.4.4 逐层预训练
+
+*P.571*
+
+预训练是为了获得更好的初始值。具体的操作是将DBM看成不同的RBM串联的形式，自上而下或者自下而上地训练。如果写出每一层的自洽方程式可知，如果训练保持单向进行，则从上到下，或者从下到上的第二层的自洽方程里，$\sigma$函数涉及来源于自下而上或者自上而下第三层单元值的内容，从而导致训练无法继续。预训练的想法是，把这一项换成顶部或者底部的副本（相当底层与第三层对第二层的影响，近似于两倍来自底层的影响），这样单向的训练就可以进行。
+
+只不过要注意的是，经过这样处理后除顶层和底层的数据外，其它层相当于经过了两倍的增益，因此连接这些层的权重得到的最终结果，都将会是我们目标值的两倍。
