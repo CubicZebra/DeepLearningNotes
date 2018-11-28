@@ -1047,3 +1047,19 @@ $$\mu_i(t) = \sigma(b_i + \sum_{j \in \mathcal{N}_i} w_{i,j} \mu_j(t-1)) \tag{21
 它不能被全部包括在内，也就是仅包含从$\boldsymbol v$到$\boldsymbol{h}^{(1)}$的权重部分，这是由受限玻尔兹曼机的结构所决定的。另外，“如果包含这些项，我们将得到一个线性模型，而不是受限玻尔兹曼机”是因为假设每一层的权重分别记为$\boldsymbol{W}^{(1)}$，$\boldsymbol{W}^{(2)}$，$\boldsymbol{W}^{(3)}$...，包含所有权重的模型经向前传播会产生这样的效果：$\boldsymbol{h}^{(n)} = \boldsymbol{W}^{(n)} \cdots \boldsymbol{W}^{(2)} \boldsymbol{W}^{(1)} \boldsymbol v = \boldsymbol{W}^\prime \boldsymbol v$，相当于对原始输入数据作了仅一次线性变换。
 
 对于$\frac{1}{2}\sum_j \beta_j W_{j,i}^2 h_j h_i$，如果$h_j \neq h_i$则其中必有一个为0，则$i$与$j$不同的项一定为0，另外$h_i^2 = h_i$，所以可以把式(20.40)化成关于式(20.41)中不同$i$成份相加的形式。
+
+####20.5.2 条件协方差的无向模型
+
+*P.579*
+
+由式(20.43)~式(20.46)向式(20.47)的推导：
+
+$$
+\begin{align}
+p_{mc}(\boldsymbol x, \boldsymbol h^{(m)}, \boldsymbol h^{(c)}) &= \frac{1}{Z}\exp\{-E_{mc}(\boldsymbol x, \boldsymbol h^{(m)}, \boldsymbol h^{(c)})\}\\
+&= \frac{1}{Z}\exp\{-\frac{1}{2}\boldsymbol x^\intercal \boldsymbol x + \sum_j \boldsymbol x^\intercal \boldsymbol W_{:,j} \boldsymbol h_j^{(m)} - \frac{1}{2}\sum_j h_j^{(c)} (\boldsymbol x^\intercal \boldsymbol r^{(j)})^2 + C\}\\
+&\propto \exp\{-\frac{1}{2}[\boldsymbol x^\intercal (\boldsymbol I + \sum_j h_j^{(c)} r^{(j)} r^{(j)\intercal}) \boldsymbol x - 2 \boldsymbol x^\intercal \sum_j \boldsymbol W_{:,j} h_j^{(m)}]\}
+\end{align}
+$$
+
+参考[这里](https://github.com/CubicZebra/MVNBayesian/blob/master/Introduction/Introduction%20to%20MVNBayesian.pdf)的推导过程，写上如上形式之后，多元高斯分布的均值与方差协方差矩阵也就一目了然了。
